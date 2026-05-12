@@ -6,7 +6,7 @@ export interface ChatMessage {
 }
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-const DEFAULT_MODEL = import.meta.env.VITE_MODEL_NAME || "google/gemma-2-9b-it:free";
+const DEFAULT_MODEL = import.meta.env.VITE_MODEL_NAME || "inclusionai/ring-2.6-1t:free";
 
 export async function getChatResponse(messages: ChatMessage[], systemInstruction?: string, model: string = DEFAULT_MODEL) {
   try {

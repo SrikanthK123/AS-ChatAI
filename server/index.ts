@@ -77,7 +77,7 @@ app.post('/api/ai/chat', async (req, res) => {
         "X-Title": "AS-ChatAI",
       },
       body: JSON.stringify({
-        model: model || "mistralai/mistral-7b-instruct:free",
+        model: model || "inclusionai/ring-2.6-1t:free",
         messages: finalMessages,
       }),
     });
@@ -116,7 +116,7 @@ app.post('/api/ai/stream', async (req, res) => {
         "X-Title": "AS-ChatAI",
       },
       body: JSON.stringify({
-        model: model || "mistralai/mistral-7b-instruct:free",
+        model: model || "inclusionai/ring-2.6-1t:free",
         messages: messages,
         stream: true,
       }),
