@@ -611,16 +611,10 @@ const ChatPage = () => {
           </div>
           <button 
             onClick={clearChat} 
-            disabled={isBackendDown}
-            className={cn(
-              "w-full py-4 px-5 rounded-2xl border transition-all flex items-center gap-3 mb-8 font-bold text-base sm:text-sm shadow-lg",
-              isBackendDown 
-                ? "bg-red-500/10 border-red-500/20 text-red-400 cursor-not-allowed" 
-                : "bg-white/5 border-white/10 hover:bg-white/10 text-white"
-            )}
+            className="w-full py-4 px-5 rounded-2xl border bg-white/5 border-white/10 hover:bg-white/10 text-white transition-all flex items-center gap-3 mb-8 font-bold text-base sm:text-sm shadow-lg group/newchat"
           >
-            {isBackendDown ? <X className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
-            {isBackendDown ? 'Backend Offline' : 'New Chat'}
+            <Plus className="w-5 h-5 transition-transform group-hover/newchat:rotate-90" />
+            New Chat
           </button>
 
           <div className="flex-1 overflow-y-auto custom-scrollbar -mx-2 px-2">
