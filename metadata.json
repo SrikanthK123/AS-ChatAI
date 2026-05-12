@@ -1,0 +1,6 @@
+{
+  "name": "AS-ChatAI",
+  "description": "Ask Smart ChatAI - An advanced AI-powered assistant with a sophisticated, glassmorphism-inspired design.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": []
+}
