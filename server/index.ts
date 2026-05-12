@@ -4,7 +4,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import fetch from 'node-fetch'; // Make sure to npm install node-fetch@2
 
-dotenv.config(); // Loads .env in production, fallback to .env.local handled by developer
+dotenv.config({ path: '.env.local' });
+dotenv.config(); 
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -57,6 +58,8 @@ const ChatSchema = new mongoose.Schema({
 const Chat = mongoose.model('Chat', ChatSchema);
 
 // --- AI PROXY ENDPOINTS ---
+
+// Non-streaming chat (used by Voice Call)
 app.post('/api/ai/chat', async (req, res) => {
   try {
     const { messages, model, systemInstruction } = req.body;
@@ -68,74 +71,75 @@ app.post('/api/ai/chat', async (req, res) => {
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+        "Authorization": `Bearer ${OPENROUTER_API_KEY.trim()}`,
         "Content-Type": "application/json",
         "HTTP-Referer": "https://srikanthk123.github.io/AS-ChatAI/",
         "X-Title": "AS-ChatAI",
       },
       body: JSON.stringify({
-        model: model || "google/gemma-2-9b-it:free",
+        model: model || "mistralai/mistral-7b-instruct:free",
         messages: finalMessages,
       }),
     });
 
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ [OpenRouter Error] ${response.status}: ${errorText}`);
+      return res.status(response.status).send(errorText);
+    }
+
     const data = await response.json();
-    if (!response.ok) return res.status(response.status).json(data);
     res.json(data);
   } catch (err) {
     res.status(500).json({ error: 'Failed to process AI chat' });
   }
 });
 
+// Streaming AI proxy (used by Main Chat)
 app.post('/api/ai/stream', async (req, res) => {
   try {
     const { messages, model } = req.body;
 
     if (!OPENROUTER_API_KEY) {
-      return res.status(500).json({ error: 'OpenRouter API key not configured on server' });
+      console.error('❌ [System] OPENROUTER_API_KEY missing!');
+      return res.status(500).json({ error: 'Server configuration error' });
     }
+
+    console.log(`📡 [AI Request] Model: ${model || 'Mistral-7B'}`);
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+        "Authorization": `Bearer ${OPENROUTER_API_KEY.trim()}`,
         "Content-Type": "application/json",
         "HTTP-Referer": "https://srikanthk123.github.io/AS-ChatAI/",
         "X-Title": "AS-ChatAI",
       },
       body: JSON.stringify({
-        model: model || "google/gemma-2-9b-it:free",
+        model: model || "mistralai/mistral-7b-instruct:free",
         messages: messages,
         stream: true,
       }),
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('OpenRouter Error:', errorData);
-      return res.status(response.status).json(errorData);
+      const errorText = await response.text();
+      console.error(`❌ [OpenRouter Error] ${response.status}: ${errorText}`);
+      return res.status(response.status).send(errorText);
     }
 
-    // Proxy the stream back to the client
+    // Proxy the stream
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
-    response.body.on('data', (chunk) => {
-      res.write(chunk);
-    });
+    response.body.on('data', (chunk) => res.write(chunk));
+    response.body.on('end', () => res.end());
+    req.on('close', () => {});
 
-    response.body.on('end', () => {
-      res.end();
-    });
-
-    req.on('close', () => {
-      // Handle client disconnect if needed
-    });
-
-  } catch (err) {
-    console.error('AI Stream Error:', err);
-    res.status(500).json({ error: 'Failed to process AI stream' });
+  } catch (err: any) {
+    console.error('❌ [System Error]', err.message);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

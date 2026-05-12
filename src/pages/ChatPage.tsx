@@ -14,7 +14,8 @@ const Header = ({ onNewChat, onToggleSidebar }: { onNewChat: () => void; onToggl
   const navigate = useNavigate();
   
   return (
-    <header className="flex items-center justify-between px-6 py-4 fixed top-0 w-full z-50 backdrop-blur-xl bg-black/80 border-b border-white/5">
+    <header className="flex items-center justify-between px-4 sm:px-8 py-4 fixed top-0 w-full z-50 backdrop-blur-xl bg-black/80 border-b border-white/5">
+      <div className="max-w-[1600px] w-full mx-auto flex items-center justify-between">
       <button
         onClick={onToggleSidebar}
         className="p-2 rounded-xl hover:bg-white/10 transition-colors"
@@ -45,6 +46,7 @@ const Header = ({ onNewChat, onToggleSidebar }: { onNewChat: () => void; onToggl
         >
           <Edit3 className="w-5 h-5" />
         </button>
+      </div>
       </div>
     </header>
   );
@@ -153,7 +155,7 @@ const ChatMessage = ({
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn(
-        "flex gap-3 sm:gap-4 w-full mb-8 relative group max-w-4xl mx-auto px-1",
+        "flex gap-3 sm:gap-6 w-full mb-10 relative group max-w-5xl mx-auto px-2 sm:px-6",
         isUser ? "flex-row-reverse" : "flex-row"
       )}
     >
@@ -173,7 +175,7 @@ const ChatMessage = ({
       </div>
 
       <div className={cn(
-        "flex flex-col gap-2 max-w-[85%] sm:max-w-[75%]",
+        "flex flex-col gap-2 max-w-[88%] sm:max-w-[800px] w-full",
         isUser ? "items-end" : "items-start"
       )}>
         {isStreaming && !message.content && !isUser && (
@@ -884,8 +886,8 @@ const ChatPage = () => {
             </AnimatePresence>
           </div>
 
-          <div className="absolute bottom-0 left-0 w-full p-4 sm:p-6 bg-gradient-to-t from-black via-black/80 to-transparent pt-12">
-            <div className="max-w-4xl mx-auto relative">
+          <div className="absolute bottom-0 left-0 w-full p-4 sm:p-8 bg-gradient-to-t from-black via-black/80 to-transparent pt-16">
+            <div className="max-w-4xl mx-auto relative px-2 sm:px-4">
               {/* Plus Menu Selection - ChatGPT style compact popover */}
               <AnimatePresence>
                 {isPlusMenuOpen && (

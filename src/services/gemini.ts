@@ -49,8 +49,12 @@ export async function* getChatResponseStream(messages: ChatMessage[], model: str
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `Server error: ${response.status}`);
+      let errorMsg = `Server error: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        errorMsg = errorData.error?.message || errorData.error || errorMsg;
+      } catch (e) {}
+      throw new Error(errorMsg);
     }
 
     const reader = response.body?.getReader();
