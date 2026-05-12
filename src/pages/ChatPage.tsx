@@ -151,14 +151,15 @@ const ChatMessage = ({
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={cn(
-        "flex gap-3 sm:gap-6 w-full mb-10 relative group max-w-5xl mx-auto px-2 sm:px-6",
-        isUser ? "flex-row-reverse" : "flex-row"
-      )}
-    >
+    <div className="w-full flex flex-col items-center">
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        className={cn(
+          "flex gap-3 sm:gap-6 w-full mb-10 relative group max-w-5xl mx-auto px-2 sm:px-6",
+          isUser ? "flex-row-reverse" : "flex-row"
+        )}
+      >
       <div className="flex-shrink-0 relative">
         {isUser ? (
           <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-zinc-800 border border-white/10 overflow-hidden shadow-xl flex items-center justify-center transition-transform group-hover:scale-105">
@@ -314,7 +315,46 @@ const ChatMessage = ({
           )}
         </div>
       </div>
-    </motion.div>
+      </motion.div>
+    </div>
+  );
+};
+
+const DateSeparator = ({ date }: { date: string }) => {
+  const formatDate = (dateStr: string) => {
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr; // Fallback for old/manual times
+      
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      
+      const messageDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      
+      if (messageDate.getTime() === today.getTime()) return "Today";
+      if (messageDate.getTime() === yesterday.getTime()) return "Yesterday";
+      
+      return d.toLocaleDateString([], { day: 'numeric', month: 'long', year: 'numeric' });
+    } catch (e) {
+      return "Earlier";
+    }
+  };
+
+  return (
+    <div className="flex justify-center my-8 relative">
+      <div className="absolute inset-0 flex items-center">
+        <div className="w-full h-[1px] bg-white/5" />
+      </div>
+      <motion.span 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="relative px-5 py-1.5 rounded-full bg-zinc-900/80 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-white/30 backdrop-blur-md"
+      >
+        {formatDate(date)}
+      </motion.span>
+    </div>
   );
 };
 
@@ -872,16 +912,27 @@ const ChatPage = () => {
                 </motion.div>
               ) : (
 
-                messages.map((m, index) => (
-                  <ChatMessage
-                    key={m.id}
-                    message={m}
-                    onEdit={(content) => { setEditingMessageId(m.id); setInput(content); }}
-                    onRegenerate={() => handleSend(messages[messages.indexOf(m) - 1]?.content)}
-                    onImageClick={setSelectedImage}
-                    isStreaming={isTyping && index === messages.length - 1 && m.role === 'model'}
-                  />
-                ))
+                messages.map((m, index) => {
+                  const showDate = index === 0 || (() => {
+                    const prevMsg = messages[index - 1];
+                    const prevDate = new Date(prevMsg.id.length > 10 ? parseInt(prevMsg.id) : Date.now()).toDateString();
+                    const currDate = new Date(m.id.length > 10 ? parseInt(m.id) : Date.now()).toDateString();
+                    return prevDate !== currDate;
+                  })();
+
+                  return (
+                    <React.Fragment key={m.id}>
+                      {showDate && <DateSeparator date={m.id.length > 10 ? new Date(parseInt(m.id)).toISOString() : new Date().toISOString()} />}
+                      <ChatMessage
+                        message={m}
+                        onEdit={(content) => { setEditingMessageId(m.id); setInput(content); }}
+                        onRegenerate={() => handleSend(messages[messages.indexOf(m) - 1]?.content)}
+                        onImageClick={setSelectedImage}
+                        isStreaming={isTyping && index === messages.length - 1 && m.role === 'model'}
+                      />
+                    </React.Fragment>
+                  );
+                })
               )}
             </AnimatePresence>
           </div>
