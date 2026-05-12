@@ -8,16 +8,7 @@ import ReactMarkdown from 'react-markdown';
 import { cn } from '../lib/utils';
 import { getChatResponseStream } from '../services/gemini';
 import { Message, ImageModal, GalaxyEarthBackground, MouseBrush, BackgroundText } from '../components/SharedUI';
-
-interface ChatSession {
-  _id: string;
-  title: string;
-  isPinned?: boolean;
-  messages: Message[];
-  updatedAt: string;
-}
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import { chatService, ChatSession } from '../services/chatService';
 
 const Header = ({ onNewChat, onToggleSidebar }: { onNewChat: () => void; onToggleSidebar?: () => void }) => {
   const navigate = useNavigate();
@@ -385,61 +376,30 @@ const ChatPage = () => {
   }, []);
 
   const fetchChats = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/chats`);
-      if (!res.ok) throw new Error('Backend unreachable');
-      const data = await res.json();
-      setChats(data.sort((a: ChatSession, b: ChatSession) => (Number(!!b.isPinned) - Number(!!a.isPinned)) || (new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())));
-      setIsBackendDown(false);
-    } catch (err) {
-      console.error('Failed to fetch chats:', err);
-      setIsBackendDown(true);
-    }
+    const data = await chatService.getChats();
+    setChats(data.sort((a, b) => (Number(!!b.isPinned) - Number(!!a.isPinned)) || (new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())));
+    setIsBackendDown(chatService.getMode() === 'Local' && !localStorage.getItem('as_chatai_local_chats'));
   };
 
   const loadChat = async (chatId: string) => {
-    try {
-      const res = await fetch(`${API_URL}/api/chats/${chatId}`);
-      const data = await res.json();
+    const data = await chatService.getChat(chatId);
+    if (data) {
       setMessages(data.messages);
       setCurrentChatId(chatId);
       if (window.innerWidth < 768) setIsSidebarOpen(false);
-    } catch (err) {
-      console.error('Failed to load chat:', err);
     }
   };
 
   const createChat = async (initialMessages: Message[] = []) => {
-    try {
-      const res = await fetch(`${API_URL}/api/chats`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: initialMessages })
-      });
-      if (!res.ok) throw new Error('Failed to create chat');
-      const data = await res.json();
-      setChats(prev => [data, ...prev]);
-      setCurrentChatId(data._id);
-      setIsBackendDown(false);
-      return data._id;
-    } catch (err) {
-      console.error('Failed to create chat:', err);
-      setIsBackendDown(true);
-      return null;
-    }
+    const data = await chatService.createChat(initialMessages);
+    setChats(prev => [data, ...prev]);
+    setCurrentChatId(data._id);
+    return data._id;
   };
 
   const saveMessage = async (chatId: string, message: Message) => {
-    try {
-      await fetch(`${API_URL}/api/chats/${chatId}/messages`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message })
-      });
-      fetchChats(); // Refresh sidebar for updated titles/timestamps
-    } catch (err) {
-      console.error('Failed to save message:', err);
-    }
+    await chatService.saveMessage(chatId, message);
+    fetchChats();
   };
 
   const deleteChat = async (e: React.MouseEvent, chat: ChatSession) => {
@@ -449,31 +409,20 @@ const ChatPage = () => {
 
   const confirmDelete = async () => {
     if (!chatToDelete) return;
-    try {
-      await fetch(`${API_URL}/api/chats/${chatToDelete._id}`, { method: 'DELETE' });
-      setChats(prev => prev.filter(c => c._id !== chatToDelete._id));
-      if (currentChatId === chatToDelete._id) {
-        setMessages([]);
-        setCurrentChatId(null);
-      }
-      setChatToDelete(null);
-    } catch (err) {
-      console.error('Failed to delete chat:', err);
+    await chatService.deleteChat(chatToDelete._id);
+    setChats(prev => prev.filter(c => c._id !== chatToDelete._id));
+    if (currentChatId === chatToDelete._id) {
+      setMessages([]);
+      setCurrentChatId(null);
     }
+    setChatToDelete(null);
   };
 
   const togglePin = async (e: React.MouseEvent, chatId: string, isPinned: boolean) => {
     e.stopPropagation();
-    try {
-      const res = await fetch(`${API_URL}/api/chats/${chatId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isPinned: !isPinned })
-      });
-      const updated = await res.json();
+    const updated = await chatService.updateChat(chatId, { isPinned: !isPinned });
+    if (updated) {
       setChats(prev => prev.map(c => c._id === chatId ? updated : c).sort((a, b) => (Number(!!b.isPinned) - Number(!!a.isPinned)) || (new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())));
-    } catch (err) {
-      console.error('Failed to toggle pin:', err);
     }
   };
 
@@ -482,28 +431,14 @@ const ChatPage = () => {
       setRenamingChatId(null);
       return;
     }
-    const oldChats = [...chats];
-    // Optimistic update
-    setChats(prev => 
-      prev.map(c => c._id === chatId ? { ...c, title: renamingValue, updatedAt: new Date().toISOString() } : c)
-      .sort((a, b) => (Number(!!b.isPinned) - Number(!!a.isPinned)) || (new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()))
-    );
-
-    try {
-      const res = await fetch(`${API_URL}/api/chats/${chatId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: renamingValue })
-      });
-      if (!res.ok) {
-        setChats(oldChats);
-      }
-    } catch (err) {
-      console.error('Failed to rename chat:', err);
-      setChats(oldChats);
-    } finally {
-      setRenamingChatId(null);
+    const updated = await chatService.updateChat(chatId, { title: renamingValue });
+    if (updated) {
+      setChats(prev => 
+        prev.map(c => c._id === chatId ? updated : c)
+        .sort((a, b) => (Number(!!b.isPinned) - Number(!!a.isPinned)) || (new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()))
+      );
     }
+    setRenamingChatId(null);
   };
 
   const startListening = async () => {
