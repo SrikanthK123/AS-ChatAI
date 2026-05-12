@@ -175,7 +175,7 @@ const ChatMessage = ({
       </div>
 
       <div className={cn(
-        "flex flex-col gap-2 max-w-[88%] sm:max-w-[800px] w-full",
+        "flex flex-col gap-2 max-w-[calc(100%-56px)] sm:max-w-[800px] w-full",
         isUser ? "items-end" : "items-start"
       )}>
         {isStreaming && !message.content && !isUser && (
