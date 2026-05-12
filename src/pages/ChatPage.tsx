@@ -921,7 +921,7 @@ const ChatPage = () => {
                   })();
 
                   return (
-                    <React.Fragment key={m.id}>
+                    <div key={m.id} className="w-full flex flex-col items-center">
                       {showDate && <DateSeparator date={m.id.length > 10 ? new Date(parseInt(m.id)).toISOString() : new Date().toISOString()} />}
                       <ChatMessage
                         message={m}
@@ -930,7 +930,7 @@ const ChatPage = () => {
                         onImageClick={setSelectedImage}
                         isStreaming={isTyping && index === messages.length - 1 && m.role === 'model'}
                       />
-                    </React.Fragment>
+                    </div>
                   );
                 })
               )}
