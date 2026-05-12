@@ -46,8 +46,10 @@ const OnboardingPage = () => {
           <div className="absolute top-[25%] left-1/2 -translate-x-1/2 flex flex-col items-center">
             <motion.div 
               layoutId="aura-sphere-core"
-              className="w-64 h-64 sm:w-80 sm:h-80 aura-logo-gradient rounded-full blur-[2px] shadow-[0_0_80px_rgba(255,138,101,0.3)] relative z-10 border border-white/10 opacity-80"
-            />
+              className="w-64 h-64 sm:w-80 sm:h-80 aura-logo-gradient rounded-full blur-[2px] shadow-[0_0_80px_rgba(255,138,101,0.3)] relative z-10 border border-white/10 overflow-hidden"
+            >
+              <img src="/logo.png" alt="Logo" className="w-full h-full object-cover opacity-90" />
+            </motion.div>
             <motion.div 
               layoutId="aura-sphere-glow"
               className="absolute inset-[-40px] sm:inset-[-60px] aura-logo-gradient rounded-full blur-[80px] opacity-20 pointer-events-none" 

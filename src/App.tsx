@@ -18,7 +18,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<OnboardingPage />} />
             <Route path="/chats" element={<ChatPage />} />
-            <Route path="/voice-call" element={<VoiceCallPage />} />
+            {/* <Route path="/voice-call" element={<VoiceCallPage />} /> */}
           </Routes>
         </AnimatePresence>
       </main>

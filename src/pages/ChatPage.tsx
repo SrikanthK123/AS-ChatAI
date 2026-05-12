@@ -24,7 +24,9 @@ const Header = ({ onNewChat, onToggleSidebar }: { onNewChat: () => void; onToggl
       </button>
 
       <div className="flex items-center gap-3 bg-white/5 px-5 py-2 rounded-full border border-white/10 shadow-inner group/pill cursor-pointer hover:bg-white/10 transition-all">
-        <div className="w-3.5 h-3.5 rounded-full aura-logo-gradient shadow-lg" />
+        <div className="w-5 h-5 rounded-full overflow-hidden shadow-lg border border-white/20">
+          <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
+        </div>
         <span className="text-xs font-black text-white/90 tracking-[0.2em] uppercase flex items-center gap-2">
           AS-ChatAI
           <ChevronRight className="w-3.5 h-3.5 text-white/20 group-hover/pill:translate-x-0.5 transition-transform" />
@@ -32,13 +34,7 @@ const Header = ({ onNewChat, onToggleSidebar }: { onNewChat: () => void; onToggl
       </div>
 
       <div className="flex items-center gap-1">
-        <button
-          onClick={() => navigate('/voice-call')}
-          className="p-2 rounded-xl hover:bg-white/10 transition-colors text-white/70 hover:text-white"
-          title="Voice Conversation"
-        >
-          <Phone className="w-5 h-5" />
-        </button>
+        {/* Voice Conversation button removed for mobile performance */}
         <button
           onClick={onNewChat}
           className="p-2 rounded-xl hover:bg-white/10 transition-colors text-white/70 hover:text-white"
