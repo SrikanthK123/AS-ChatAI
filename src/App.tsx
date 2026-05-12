@@ -10,7 +10,7 @@ import { ConversationProvider } from '@elevenlabs/react';
 
 export default function App() {
   return (
-    <Router>
+    <Router basename="/AS-ChatAI">
       <main className="h-screen w-full mesh-gradient relative font-sans overflow-hidden">
         <VisualAura />
         
