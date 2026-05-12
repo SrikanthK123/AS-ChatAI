@@ -64,7 +64,7 @@ async function getOpenRouterResponse(messages: ChatMessage[]) {
       headers: {
         "Authorization": `Bearer ${API_KEY}`,
         "Content-Type": "application/json",
-        "HTTP-Referer": "https://as-chatai.vercel.app",
+        "HTTP-Referer": window.location.origin,
         "X-Title": "AS-ChatAI",
       },
       body: JSON.stringify({
@@ -119,7 +119,7 @@ export async function* getChatResponseStream(messages: ChatMessage[], signal?: A
         headers: {
           "Authorization": `Bearer ${API_KEY}`,
           "Content-Type": "application/json",
-          "HTTP-Referer": "https://as-chatai.vercel.app",
+          "HTTP-Referer": window.location.origin,
           "X-Title": "AS-ChatAI",
         },
         body: JSON.stringify({
@@ -178,9 +178,9 @@ export async function* getChatResponseStream(messages: ChatMessage[], signal?: A
           }
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("OpenRouter Streaming Error:", error);
-      yield { type: "content", value: "Streaming failed." };
+      yield { type: "content", value: `Connection failed: ${error.message || 'Check your internet or API key'}` };
     }
     return;
   }
