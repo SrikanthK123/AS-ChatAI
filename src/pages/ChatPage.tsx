@@ -964,13 +964,13 @@ const ChatPage = () => {
                 )}
               </AnimatePresence>
 
-              <div className="glass-dark border-white/10 rounded-[28px] p-2 flex items-end gap-2 shadow-2xl relative z-10">
-                <button onClick={() => setIsPlusMenuOpen(!isPlusMenuOpen)} className={cn("p-3 rounded-2xl transition-all", isPlusMenuOpen ? "bg-white text-black" : "text-[#8B5CF6] hover:text-purple-400")}><Plus className={cn("w-5 h-5 transition-transform", isPlusMenuOpen && "rotate-45")} /></button>
-                <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }} placeholder="Ask anything..." className="flex-1 bg-transparent border-none focus:ring-0 text-white placeholder-white/20 py-3 px-2 resize-none max-h-40 min-h-[44px] text-sm" />
+              <div className="glass-dark border-white/10 rounded-[24px] sm:rounded-[28px] p-1.5 sm:p-2 flex items-end gap-1 sm:gap-2 shadow-2xl relative z-10">
+                <button onClick={() => setIsPlusMenuOpen(!isPlusMenuOpen)} className={cn("p-2.5 sm:p-3 rounded-2xl transition-all", isPlusMenuOpen ? "bg-white text-black" : "text-[#8B5CF6] hover:text-purple-400")}><Plus className={cn("w-5 h-5 transition-transform", isPlusMenuOpen && "rotate-45")} /></button>
+                <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }} placeholder="Ask anything..." className="flex-1 bg-transparent border-none focus:ring-0 text-white placeholder-white/20 py-2.5 sm:py-3 px-1.5 sm:px-2 resize-none max-h-40 min-h-[40px] text-[14px] sm:text-sm" />
                 <button 
                   onClick={toggleListening}
                   className={cn(
-                    "p-3 transition-all relative group flex items-center justify-center",
+                    "p-2.5 sm:p-3 transition-all relative group flex items-center justify-center",
                     isListening ? "text-[#dd3c58]" : "text-[#dd3c58]/60 hover:text-[#dd3c58]"
                   )}
                 >
@@ -1030,7 +1030,7 @@ const ChatPage = () => {
                   </AnimatePresence>
                   <Mic className={cn("w-5 h-5 relative z-10 transition-all duration-300", isListening ? "scale-150 opacity-0" : "scale-100 opacity-100")} />
                 </button>
-                <button onClick={() => handleSend()} disabled={!input.trim() || isTyping} className={cn("p-3 rounded-full transition-all active:scale-90", input.trim() ? "aura-logo-gradient text-white shadow-lg scale-110" : "bg-white/5 text-white/10")}><Send className="w-4 h-4 sm:w-5 sm:h-5" /></button>
+                <button onClick={() => handleSend()} disabled={!input.trim() || isTyping} className={cn("p-2.5 sm:p-3 rounded-full transition-all active:scale-90", input.trim() ? "aura-logo-gradient text-white shadow-lg scale-105 sm:scale-110" : "bg-white/5 text-white/10")}><Send className="w-4 h-4 sm:w-5 sm:h-5" /></button>
               </div>
             </div>
           </div>
